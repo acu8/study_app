@@ -11,7 +11,7 @@ import {
   TableContainer,
   Spinner,
   Heading,
-  Stack,
+  VStack,
   Modal,
   ModalOverlay,
   ModalContent,
@@ -25,7 +25,12 @@ import {
   useDisclosure,
   Input,
   FormErrorMessage,
+  Flex,
+  useColorMode,
+  Box,
 } from "@chakra-ui/react";
+import { FaCheck } from "react-icons/fa";
+import { MoonIcon, SunIcon } from "@chakra-ui/icons";
 
 import { Record } from "./domain/record";
 import { addContent, deleteContent, getAll } from "./utils/supabaseFunction";
@@ -41,6 +46,7 @@ function App() {
   const [record, setRecord] = useState<Record[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [editRecord, setEditRecord] = useState<Record | null>(null);
+  const { colorMode, toggleColorMode } = useColorMode();
 
   const {
     control,
@@ -121,159 +127,213 @@ function App() {
 
   return (
     <>
-      <Stack spacing={5}>
-        <Heading as="h1" size="4xl" noOfLines={1} data-testid="title">
-          Study Time Record
-        </Heading>
-      </Stack>
-      <Button onClick={onOpen} data-testid="submit">
-        登録をする
-      </Button>
-      <Modal
-        initialFocusRef={initialRef}
-        finalFocusRef={finalRef}
-        isOpen={isOpen}
-        onClose={onClose}
-      >
-        <form onSubmit={handleSubmit(onRegisterRecord)}>
-          <ModalOverlay />
-          <ModalContent>
-            <ModalHeader data-testid="modal-title">
-              {editRecord ? "記録編集" : "新学習を記録する"}
-            </ModalHeader>
-            <ModalCloseButton />
-            <ModalBody pb={6}>
-              <FormControl isInvalid={!!errors.content}>
-                <FormLabel>学習記録</FormLabel>
-                <Controller
-                  name="content"
-                  control={control}
-                  rules={{
-                    required: "学習内容の入力は必須です",
-                    validate: (value) =>
-                      value.trim() !== "" || "空白のみの入力は無効です",
-                  }}
-                  render={({ field }) => (
-                    <Input
-                      {...field}
-                      ref={initialRef}
-                      placeholder="学習した内容を記入"
-                      onChange={(e) => {
-                        field.onChange(e);
-                        setValue("content", e.target.value);
+      <Box minHeight="100vh" height="100vh" p={4}>
+        <Flex maxWidth="1600px" mx="auto" width="100%">
+          <VStack
+            width="33%"
+            alignItems="center"
+            justifyContent="space-between"
+            spacing={8}
+            pr={8}
+            py={12}
+            height="100%"
+          >
+            <Box />
+            <Heading
+              as="h1"
+              size="2xl"
+              color="gray.400"
+              textAlign="center"
+              noOfLines={1}
+              data-testid="title"
+            >
+              Study Time Record
+            </Heading>
+
+            <Button
+              onClick={onOpen}
+              data-testid="submit"
+              leftIcon={<FaCheck />}
+              colorScheme="blue"
+              size="md"
+              width="auto"
+              px={6}
+              my={10}
+            >
+              登録をする
+            </Button>
+            <Box />
+          </VStack>
+          <Box position="fixed" bottom="6" left="6" zIndex="docked">
+            <Button
+              onClick={toggleColorMode}
+              leftIcon={colorMode === "light" ? <MoonIcon /> : <SunIcon />}
+            >
+              {colorMode === "light" ? "" : ""}
+            </Button>
+          </Box>
+
+          <Modal
+            initialFocusRef={initialRef}
+            finalFocusRef={finalRef}
+            isOpen={isOpen}
+            onClose={onClose}
+          >
+            <form onSubmit={handleSubmit(onRegisterRecord)}>
+              <ModalOverlay />
+              <ModalContent>
+                <ModalHeader data-testid="modal-title">
+                  {editRecord ? "記録編集" : "新学習を記録する"}
+                </ModalHeader>
+                <ModalCloseButton />
+                <ModalBody pb={6}>
+                  <FormControl isInvalid={!!errors.content}>
+                    <FormLabel>学習記録</FormLabel>
+                    <Controller
+                      name="content"
+                      control={control}
+                      rules={{
+                        required: "学習内容の入力は必須です",
+                        validate: (value) =>
+                          value.trim() !== "" || "空白のみの入力は無効です",
                       }}
+                      render={({ field }) => (
+                        <Input
+                          {...field}
+                          ref={initialRef}
+                          placeholder="学習した内容を記入"
+                          onChange={(e) => {
+                            field.onChange(e);
+                            setValue("content", e.target.value);
+                          }}
+                        />
+                      )}
                     />
-                  )}
-                />
-                <FormErrorMessage>
-                  {errors.content && errors.content.message}
-                </FormErrorMessage>
-              </FormControl>
+                    <FormErrorMessage>
+                      {errors.content && errors.content.message}
+                    </FormErrorMessage>
+                  </FormControl>
 
-              <FormControl mt={4} isInvalid={!!errors.time}>
-                <FormLabel>学習時間</FormLabel>
-                <Controller
-                  name="time"
-                  control={control}
-                  rules={{
-                    required: "学習時間の入力は必須です",
-                    min: {
-                      value: 0.1,
-                      message: "学習時間は0.1以上である必要があります",
-                    },
-                  }}
-                  render={({ field }) => (
-                    <Input
-                      {...field}
-                      placeholder="学習した時間を記入"
-                      type="number"
-                      step="0.1"
-                      onChange={(e) => {
-                        field.onChange(e);
-                        const value = e.target.value
-                          ? parseFloat(e.target.value)
-                          : "";
-                        field.onChange(value);
+                  <FormControl mt={4} isInvalid={!!errors.time}>
+                    <FormLabel>学習時間</FormLabel>
+                    <Controller
+                      name="time"
+                      control={control}
+                      rules={{
+                        required: "学習時間の入力は必須です",
+                        min: {
+                          value: 0.1,
+                          message: "学習時間は0.1以上である必要があります",
+                        },
                       }}
+                      render={({ field }) => (
+                        <Input
+                          {...field}
+                          placeholder="学習した時間を記入"
+                          type="number"
+                          step="0.1"
+                          onChange={(e) => {
+                            field.onChange(e);
+                            const value = e.target.value
+                              ? parseFloat(e.target.value)
+                              : "";
+                            field.onChange(value);
+                          }}
+                        />
+                      )}
                     />
-                  )}
-                />
-                <FormErrorMessage>
-                  {errors.time && errors.time.message}
-                </FormErrorMessage>
-              </FormControl>
-            </ModalBody>
+                    <FormErrorMessage>
+                      {errors.time && errors.time.message}
+                    </FormErrorMessage>
+                  </FormControl>
+                </ModalBody>
 
-            <ModalFooter>
-              <Button
-                colorScheme="blue"
-                mr={3}
-                type="submit"
-                data-testid="register"
-                // isDisabled={
-                //   !watchedFields.content ||
-                //   !watchedFields.time ||
-                //   watchedFields.time <= 0
-                // }
-              >
-                登録
-              </Button>
-              <Button
-                onClick={() => {
-                  reset();
-                  onClose();
-                }}
-              >
-                キャンセル
-              </Button>
-            </ModalFooter>
-          </ModalContent>
-        </form>
-      </Modal>
-
-      {record.length === 0 ? (
-        <p>No records found.</p>
-      ) : (
-        <TableContainer>
-          <Table variant="simple" data-testid="table">
-            <TableCaption>Imperial to metric conversion factors</TableCaption>
-            <Thead>
-              <Tr>
-                <Th>Title</Th>
-                <Th>Time</Th>
-                <Th></Th>
-                <Th></Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {record.map((record) => (
-                <Tr key={record.id}>
-                  <Td>{record.content}</Td>
-                  <Td>{record.time}</Td>
-                  <Td>
-                    <Button
-                      onClick={() => handleDelete(record.id)}
-                      data-testid="delete"
-                    >
-                      削除
-                    </Button>
-                  </Td>
-                  <Td>
-                    <Button
-                      onClick={() => handleEdit(record.id)}
-                      data-testid="edit"
-                      role="button"
-                      aria-label="編集"
-                    >
-                      編集
-                    </Button>
-                  </Td>
-                </Tr>
-              ))}
-            </Tbody>
-          </Table>
-        </TableContainer>
-      )}
+                <ModalFooter>
+                  <Button
+                    colorScheme="blue"
+                    mr={3}
+                    type="submit"
+                    data-testid="register"
+                    // isDisabled={
+                    //   !watchedFields.content ||
+                    //   !watchedFields.time ||
+                    //   watchedFields.time <= 0
+                    // }
+                  >
+                    登録
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      reset();
+                      onClose();
+                    }}
+                  >
+                    キャンセル
+                  </Button>
+                </ModalFooter>
+              </ModalContent>
+            </form>
+          </Modal>
+          <Box
+            width="67%"
+            pl={8}
+            borderWidth="1px"
+            borderRadius="lg"
+            p={4}
+            boxShadow="lg"
+          >
+            {record.length === 0 ? (
+              <p>No records found.</p>
+            ) : (
+              <TableContainer>
+                <Table variant="simple" data-testid="table">
+                  <TableCaption>
+                    Imperial to metric conversion factors
+                  </TableCaption>
+                  <Thead>
+                    <Tr>
+                      <Th>Title</Th>
+                      <Th>Time</Th>
+                      <Th></Th>
+                      <Th></Th>
+                    </Tr>
+                  </Thead>
+                  <Tbody>
+                    {record.map((record) => (
+                      <Tr key={record.id}>
+                        <Td>{record.content}</Td>
+                        <Td>{record.time}</Td>
+                        <Td>
+                          <Button
+                            onClick={() => handleDelete(record.id)}
+                            data-testid="delete"
+                            variant="outline"
+                            colorScheme="red"
+                          >
+                            削除
+                          </Button>
+                        </Td>
+                        <Td>
+                          <Button
+                            onClick={() => handleEdit(record.id)}
+                            data-testid="edit"
+                            role="button"
+                            aria-label="編集"
+                            variant="outline"
+                            colorScheme="teal"
+                          >
+                            編集
+                          </Button>
+                        </Td>
+                      </Tr>
+                    ))}
+                  </Tbody>
+                </Table>
+              </TableContainer>
+            )}
+          </Box>
+        </Flex>
+      </Box>
     </>
   );
 }
