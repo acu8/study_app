@@ -287,9 +287,6 @@ function App() {
             ) : (
               <TableContainer>
                 <Table variant="simple" data-testid="table">
-                  <TableCaption>
-                    Imperial to metric conversion factors
-                  </TableCaption>
                   <Thead>
                     <Tr>
                       <Th>Title</Th>
