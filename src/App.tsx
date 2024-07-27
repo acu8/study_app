@@ -82,6 +82,7 @@ function App() {
       setRecord(suparecords);
       onClose();
       reset();
+      setEditRecord(null);
     } catch (error) {
       console.log("Error occured when registering content", error);
     }
